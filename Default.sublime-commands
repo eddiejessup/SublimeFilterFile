@@ -1,0 +1,6 @@
+[
+    {
+        "caption": "FilterFile: Select filter",
+        "command": "filter_file",
+    }
+]

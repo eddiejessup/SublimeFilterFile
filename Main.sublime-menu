@@ -1,0 +1,46 @@
+[
+    {
+        "id": "tools",
+        "children":
+            [
+                { "caption": "-" },
+                {
+                    "caption": "Filter file",
+                    "command": "filter_file",
+                }
+            ]
+    },
+    {
+        "id": "preferences",
+        "children":
+        [
+            {
+                "id": "package-settings",
+                "children":
+                [
+                    {
+                        "caption": "FilterFile",
+                        "children":
+                        [
+                            {
+                                "caption": "Settings",
+                                "command": "edit_settings", "args":
+                                {
+                                    "base_file": "${packages}/FilterFile/FilterFile.sublime-settings",
+                                }
+                            },
+                            {
+                                "caption": "Key Bindings",
+                                "command": "edit_settings", "args":
+                                {
+                                    "base_file": "${packages}/FilterFile/keymaps/Default ($platform).sublime-keymap",
+                                    "default": "${packages}/User/Default ($platform).sublime-keymap"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

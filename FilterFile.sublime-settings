@@ -1,0 +1,12 @@
+{
+    "filters": {
+        "Stylish Haskell": [
+            "~/.local/bin/stylish-haskell",
+            "--config",
+            "~/.stylish-haskell.yaml",
+        ],
+        "Brittany": [
+            "~/.cabal/bin/brittany",
+        ],
+    }
+}
