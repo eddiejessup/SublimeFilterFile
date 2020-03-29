@@ -16,8 +16,15 @@ OUTPUT_PANEL_NAME = 'file_filter_error'
 SETTINGS_FILE_NAME = 'FilterFile.sublime-settings'
 
 def get_filters():
-    settings = sublime.load_settings(SETTINGS_FILE_NAME)
-    return settings.get('filters', {})
+    return sublime.load_settings(SETTINGS_FILE_NAME).get('filters', [])
+
+def get_filter(key):
+    filters = get_filters()
+    try:
+        return next(f for f in filters if f['key'] == key)
+    except StopIteration:
+        keys = ', '.join(f["key"] for f in filters)
+        raise KeyError(f'No filter found with key "{key}". Found keys "{keys}"')
 
 def set_contents(view, edit, text):
     view.replace(edit, sublime.Region(0, view.size()), text)
@@ -25,7 +32,7 @@ def set_contents(view, edit, text):
 def show_panel_message(window, message):
     v = window.create_output_panel(OUTPUT_PANEL_NAME)
     v.run_command("set_contents", {"text": message})
-    window.run_command("show_panel", {f"panel": "output.{OUTPUT_PANEL_NAME}"})
+    window.run_command("show_panel", {"panel": f"output.{OUTPUT_PANEL_NAME}"})
 
 class SetContentsCommand(sublime_plugin.TextCommand):  # pylint: disable=too-few-public-methods
 
@@ -39,23 +46,23 @@ class FilterFileCommand(sublime_plugin.TextCommand):  # pylint: disable=too-few-
         return "Filter with"
 
     def input(self, args):  # pylint: disable=no-self-use
-        return None if "cmd_key" in args else CmdKeyInputHandler()
+        return None if "key" in args else KeyInputHandler()
 
     def show_error(self, msg):
         show_panel_message(self.view.window(), f'Error: {msg}')
 
-    def run(self, edit, cmd_key):
+    def run(self, edit, key):
         filename = self.view.file_name()
 
         if filename:
             dirname = os.path.dirname(filename)
-            filters = get_filters()
 
             try:
-                cmd_raw = filters[cmd_key]
-            except KeyError:
-                self.show_error(f'Command key "{cmd_key}" not found')
+                filt = get_filter(key)
+            except KeyError as e:
+                self.show_error(e)
             else:
+                cmd_raw = filt['command']
                 cmd = list(map(os.path.expanduser, cmd_raw))
                 cmd_full = cmd + [filename]
 
@@ -85,14 +92,13 @@ class FilterFileCommand(sublime_plugin.TextCommand):  # pylint: disable=too-few-
         else:
             self.show_error('Current view has no filename')
 
-
-class CmdKeyInputHandler(sublime_plugin.ListInputHandler):  # pylint: disable=too-few-public-methods
+class KeyInputHandler(sublime_plugin.ListInputHandler):  # pylint: disable=too-few-public-methods
 
     def name(self):  # pylint: disable=no-self-use
-        return "cmd_key"
+        return "key"
 
     def placeholder(self):  # pylint: disable=no-self-use
         return "file filter"
 
     def list_items(self):  # pylint: disable=no-self-use
-        return list(get_filters().keys())
+        return [(f['label'], f['key']) for f in get_filters()]

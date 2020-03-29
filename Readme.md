@@ -29,7 +29,7 @@ Linux:
 
 ### Low-level functionality
 
-The package provides a command, `filter_file`, that takes one required string argument, `cmd_key`. This key is used to look up a filter command from a list specified in the plugin settings (explained in the 'Configuration' section). The key should map to a list of strings, representing a command, potentially with arguments.
+The package provides a command, `filter_file`, that takes one required string argument, `key`. This key is used to look up a filter command from a list specified in the plugin settings (explained in the 'Configuration' section). The key should map to a list of strings, representing a command, potentially with arguments.
 
 This command is run with the path of the file in the current view appended to the list of arguments. If the command's return code is zero, then the current view's contents are replaced by the standard output produced by running the command.
 
@@ -45,15 +45,15 @@ The plugin adds a menu entry under `Tools/Filter file`, which opens the interact
 
 The plugin binds a shortcut, `"ctrl+k", "ctrl+f"`, or `"cmd+k", "cmd+f"` on MacOS, which opens the interactive filter dialog.
 
-You can also define a keyboard shortcut which runs the plugin for a particular filter, by binding a key pattern to the `filter_file` command with the argument `cmd_key` specifying your intended file filter, as listed in the plugin settings.
+You can also define a keyboard shortcut which runs the plugin for a particular filter, by binding a key pattern to the `filter_file` command with the argument `key` specifying your intended file filter, as listed in the plugin settings.
 
-For example, to add a shortcut to run a command defined under the key 'Stylish Haskell', you might add a key binding like:
+For example, to add a shortcut to run a command defined under the key 'stylish-haskell', you might add a key binding like:
 
 ```
 {
     "keys": ["ctrl+k", "ctrl+s"],
     "command": "filter_file",
-    args: { "cmd_key": "Stylish Haskell" }
+    args: { "key": "stylish-haskell" }
 }
 ```
 
@@ -61,9 +61,29 @@ For example, to add a shortcut to run a command defined under the key 'Stylish H
 
 You can edit the key mappings, and plugin settings through the menu, at `Sublime Text/Preferences/Package Settings/Filter File`.
 
-The value under the key `filters` in the plugin settings should define an object mapping a `cmd_key` string to an array of strings representing some terminal command.
+The plugin settings file has the structure:
 
-When running the filter command, any `~` characters at the start of any of the command arguments will be expanded to the user's home directory.
+```
+// Settings structure:
+{
+    filters: Array<Filter>
+}
+
+// Type of 'Filter':
+{
+    key: String,
+    label: String,
+    command: Array<String>,
+}
+```
+
+One `Filter` object describes a single filter that can be applied to modify a file. The order of filters defines the order shown in the interactive dialog.
+
+In a particular filter definition,
+
+- `key`: a unique string for use in key bindings, to specify a particular filter to apply without going through the interactive dialog.
+- `label`: a string to show when listing the filters in the interactive dialog.
+- `command`: a list of strings specifying a command to run in the terminal, structured to expect one more argument that is a file path. When running the filter command, any `~` characters at the start of any elements of the command array will be replaced with the path of the user's home.
 
 ### Example
 
@@ -75,13 +95,17 @@ To add this filter, our user plugin settings might look like:
 
 ```
 {
-    "filters": {
-        "Stylish Haskell": [
-            "~/.local/bin/stylish-haskell",
-            "--config",
-            "~/.stylish-haskell.yaml",
-        ],
-    }
+    "filters": [
+        {
+            "key": "stylish-haskell",
+            "label": "Stylish Haskell",
+            "command": [
+                "~/.local/bin/stylish-haskell",
+                "--config",
+                "~/.stylish-haskell.yaml",
+            ],
+        }
+    ]
 }
 ```
 

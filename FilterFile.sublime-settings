@@ -1,12 +1,9 @@
 {
-    "filters": {
-        "Stylish Haskell": [
-            "~/.local/bin/stylish-haskell",
-            "--config",
-            "~/.stylish-haskell.yaml",
-        ],
-        "Brittany": [
-            "~/.cabal/bin/brittany",
-        ],
-    }
+    "filters": [
+        {
+            "key": "schmittany",
+            "label": "Schmittany",
+            "command": "~/.cabal/bin/brittany",
+        }
+    ]
 }
